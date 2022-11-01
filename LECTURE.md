@@ -202,6 +202,8 @@ Screen options.headerRight로 우측 버튼(useLayoutEffect) 옵션 목록
 npm install @react-navigation/bottom-tabs
 App.tsx
 
+
+
 Tab.Navigator 도입
 isLoggedIn 분기처리
 Drawer과 Tab.Group 사용처 소개 src/pages/Delivery.tsx
