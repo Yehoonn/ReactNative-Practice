@@ -4,17 +4,22 @@ import {
   Keyboard,
   StyleProp,
   ViewStyle,
-  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scrollview';
 
-const DisMissKeyboardView: React.FC<{style?: StyleProp<ViewStyle>}> =({
-     ({children, ...props}) => (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <KeyboardAvoidingView {...props} style={props.style}>
-        {children}
-        </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
-    );
-}
+const DisMissKeyboardView: React.FC<{style?: StyleProp<ViewStyle>}> = ({
+  children,
+  ...props
+}) => (
+  <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+    <KeyboardAwareScrollView
+      {...props}
+      behavior={Platform.OS === 'android' ? 'position' : 'padding'}
+      style={props.style}>
+      {children}
+    </KeyboardAwareScrollView>
+  </TouchableWithoutFeedback>
+);
 
 export default DisMissKeyboardView;

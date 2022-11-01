@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import {RootStackParamList} from '../../App';
+import DisMissKeyboardView from '../components/DismissKeyboardView';
 import styles from '../modules/Styles';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
@@ -35,7 +36,7 @@ const SignIn = ({navigation}: SignInScreenProps) => {
   }, [navigation]);
 
   return (
-    <View>
+    <DisMissKeyboardView>
       <View style={styles.inputWrapper}>
         <Text style={styles.label}>이메일</Text>
         <TextInput
@@ -95,7 +96,7 @@ const SignIn = ({navigation}: SignInScreenProps) => {
           <Text style={styles.loginButtonText}>회원가입</Text>
         </Pressable>
       </View>
-    </View>
+    </DisMissKeyboardView>
   );
 };
 
