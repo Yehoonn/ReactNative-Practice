@@ -7,41 +7,56 @@ import {
   Pressable,
   Alert,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
-import {RootStackParamList} from '../../App';
+import {RootStackParamList} from '../../AppInner';
 import styles from '../modules/Styles';
 import DisMissKeyboardView from '../components/DismissKeyboardView';
+import axios, {AxiosError} from 'axios';
+import Config from 'react-native-config';
 
 type SignInScreenProps = NativeStackScreenProps<RootStackParamList, 'SignIn'>;
 
-const SignIn = ({navigation}: SignInScreenProps) => {
+const SignUp = ({navigation}: SignInScreenProps) => {
+  const [loading, setLoading] = useState<boolean | null>(null);
   const emailRef = useRef<TextInput | null>(null);
   const passWordRef = useRef<TextInput | null>(null);
   const nameRef = useRef<TextInput | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassWord] = useState('');
   const [name, setName] = useState('');
-  const onSubmit = useCallback(() => {
-    if (!email || !email.trim()) {
-      return Alert.alert('알림', '이메일을 입력해주세요');
-    }
-
-    if (!name || !name.trim()) {
-      return Alert.alert('알림', '이메일을 입력해주세요');
-    }
-
-    if (!password || !password.trim()) {
-      return Alert.alert('알림', '비밀번호를 입력해주세요');
-    }
-
-    Alert.alert('알림', '로그인을 시도합니다');
-  }, [email, password, name]);
 
   const cangoNext = email && password && name;
 
-  const toSignUp = useCallback(() => {
-    navigation.navigate('SignUp');
-  }, [navigation]);
+  const toSignUp = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        `${Config.API_URL}/user`,
+        {
+          email,
+          password,
+          name,
+        },
+        {
+          headers: {
+            token: '고유한 값',
+          },
+        },
+      );
+      Alert.alert('알림', '회원가입 성공!');
+      navigation.navigate('SignIn');
+    } catch (error) {
+      console.log(error);
+      const errorResponse = (error as AxiosError).response;
+      console.log(errorResponse);
+      if (errorResponse) {
+        Alert.alert('알림', errorResponse.data.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [navigation, email, password, name]);
 
   return (
     <DisMissKeyboardView behavior="position">
@@ -97,7 +112,7 @@ const SignIn = ({navigation}: SignInScreenProps) => {
           }}
           value={password}
           secureTextEntry={true}
-          onSubmitEditing={onSubmit}
+          onSubmitEditing={toSignUp}
           importantForAutofill="yes"
           autoComplete="password"
           textContentType="password"
@@ -114,12 +129,16 @@ const SignIn = ({navigation}: SignInScreenProps) => {
                   styles.SignUpButtonActive,
                 )
           }
-          disabled={!cangoNext}>
-          <Text style={styles.loginButtonText}>회원가입</Text>
+          disabled={!cangoNext || loading}>
+          {loading ? (
+            <ActivityIndicator color="lightblue" />
+          ) : (
+            <Text style={styles.loginButtonText}>회원가입</Text>
+          )}
         </Pressable>
       </View>
     </DisMissKeyboardView>
   );
 };
 
-export default SignIn;
+export default SignUp;
