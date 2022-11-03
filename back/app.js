@@ -28,10 +28,52 @@ app.use(cors());
 
 const jwtSecret = 'JWT_SECRET';
 const users = {};
+const menus = [
+  '근수네 옛날통닭',
+  '상호네 막창구이',
+  '예훈이네 피자스쿨',
+  '상희네 족발&보쌈',
+  '연주네 직화짬뽕',
+  '김가네 홍합짬뽕',
+  '가츠비',
+  '삼식이 식당',
+  '두진이형의 파스타',
+  '모루',
+  '스모키 하우스',
+];
+const startLocal = [
+  '둔산동',
+  '탄방동',
+  '용문동',
+  '도마 1동',
+  '도마 2동',
+  '정림동',
+  '관저동',
+  '홍대 네거리',
+  '전주',
+  '익산',
+  '용산',
+  '광명',
+  '부산',
+  '시청역',
+];
+const EndLocal = [
+  '가수원동',
+  '은행동',
+  '관평동',
+  '신촌',
+  '대흥동',
+  '목동',
+  '법동',
+  '비래동',
+  '문화동',
+];
+
+const random = array => {
+  return array[Math.abs(Math.floor(Math.random() * array.length - 1))];
+};
 
 const verifyToken = (req, res, next) => {
-  console.log('토큰 검증');
-  console.log(req.headers);
   if (!req.headers.authorization) {
     return res.status(401).json({message: '토큰이 없습니다.'});
   }
@@ -95,6 +137,7 @@ app.post('/refreshToken', verifyRefreshToken, (req, res, next) => {
       accessToken,
       email: res.locals.email,
       name: users[res.locals.email].name,
+      money: users[res.locals.email].money,
     },
   });
 });
@@ -102,8 +145,6 @@ app.get('/test', (req, res) => {
   res.send('하이');
 });
 app.post('/user', (req, res, next) => {
-  console.log('회원가입 요청');
-  console.log(req.body);
   if (users[req.body.email]) {
     return res.status(401).json({message: '이미 가입한 회원입니다.'});
   }
@@ -111,14 +152,21 @@ app.post('/user', (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     name: req.body.name,
+    money: 0,
   };
 
   return res.json({
     data: {
       email: req.body.email,
       name: req.body.name,
+      money: 0,
     },
   });
+});
+
+app.post('/money', verifyToken, (req, res) => {
+  users[res.locals.email].money += Number(req.body.money);
+  res.json(users[res.locals.email].name);
 });
 
 app.post('/login', (req, res, next) => {
@@ -139,17 +187,18 @@ app.post('/login', (req, res, next) => {
     {expiresIn: '5m'},
   );
   users[req.body.email].refreshToken = refreshToken;
+
   return res.json({
     data: {
       name: users[req.body.email].name,
       email: req.body.email,
+      money: users[req.body.email].money,
       refreshToken,
       accessToken,
     },
   });
 });
 app.post('/logout', verifyToken, (req, res, next) => {
-  delete users[res.locals.email];
   res.json({message: 'ok'});
 });
 
@@ -231,11 +280,12 @@ app.post('/phonetoken', (req, res, next) => {
   res.send('ok');
 });
 app.get('/showmethemoney', verifyToken, (req, res, next) => {
-  const order = orders.filter(
-    v => v.rider === res.locals.email && !!v.completedAt,
-  );
+  // const order = orders.filter(
+  //   v => v.rider === res.locals.email && !!v.completedAt,
+  // );
   res.json({
-    data: order.reduce((a, c) => a + c.price, 0) || 0,
+    // data: order.reduce((a, c) => a + c.price, 0) || 0,
+    data: users[res.locals.email].money,
   });
 });
 
@@ -272,7 +322,7 @@ io.on('connection', socket => {
     }
     console.log(socket.id, '로그인했습니다.');
     id = setInterval(() => {
-      io.emit('hello', 'emit');
+      io.emit('data', 'orderData');
     }, 1000);
   });
   socket.on('ignoreOrder', () => {
@@ -297,6 +347,9 @@ io.on('connection', socket => {
         },
         price: Math.floor(Math.random() * 6) * 1000 + 6000,
         rider: Math.random() > 0.5 ? shortid() : undefined,
+        menu: random(menus),
+        startLocal: random(startLocal),
+        endLocal: random(EndLocal),
       };
       orders.push(order);
       io.emit('order', order);

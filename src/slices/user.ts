@@ -1,21 +1,29 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 const initialState = {
   name: '',
   email: '',
+  money: 0,
   accessToken: '',
   refreshToken: '',
 };
 
 const userSlice = createSlice({
-  name: 'userSlice',
-  initialState: initialState,
+  name: 'user',
+  initialState,
   reducers: {
     setUser(state, action) {
       state.email = action.payload.email;
       state.name = action.payload.name;
+      state.money = action.payload.money;
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
+    },
+    setMoney(state, action: PayloadAction<number>) {
+      state.money = action.payload;
+    },
+    addMoney(state, action: PayloadAction<number>) {
+      state.money += action.payload;
     },
   },
   extraReducers: builder => {},

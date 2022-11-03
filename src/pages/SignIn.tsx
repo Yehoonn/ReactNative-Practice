@@ -45,6 +45,7 @@ const SignIn = ({navigation}: SignInScreenProps) => {
         userSlice.actions.setUser({
           name: response.data.data.name,
           email: response.data.data.email,
+          money: response.data.data.money,
           accessToken: response.data.data.accessToken,
         }),
       );

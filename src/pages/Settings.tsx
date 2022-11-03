@@ -1,34 +1,81 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {Text, View, Pressable, Alert} from 'react-native';
 import styles from '../modules/Styles';
 import EncryptedStorage from 'react-native-encrypted-storage';
-import axios from 'axios';
+import axios, {AxiosError} from 'axios';
 import Config from 'react-native-config';
+import userSlice from '../slices/user';
+import {RootState} from '../store/reducer';
+import {useAppDispatch} from '../store';
+import {useSelector} from 'react-redux';
 
 const Settings = () => {
-  const logOut = async () => {
-    try {
-      const response = await axios.post(
-        `${Config.API_URL}/logout`,
-        await EncryptedStorage.getItem('refreshToken'),
-      );
-      if (response.data.message === 'ok') {
-        await EncryptedStorage.removeItem('refreshToken');
-        Alert.alert('알림', '로그아웃 완료!');
-      } else {
-        Alert.alert('알림', '토큰이 없습니다');
+  const name = useSelector((state: RootState) => state.user.name);
+  const money = useSelector((state: RootState) => state.user.money);
+  const accessToken = useSelector((state: RootState) => state.user.accessToken);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const getMoney = async () => {
+      try {
+        const response = await axios.get<{data: number}>(
+          `${Config.API_URL}/showmethemoney`,
+          {
+            headers: {authorization: `Bearer ${accessToken}`},
+          },
+        );
+        dispatch(userSlice.actions.setMoney(response.data.data));
+        console.log(response.data);
+      } catch (error) {
+        console.log(error);
       }
+    };
+    getMoney();
+  }, [accessToken, dispatch]);
+
+  const logOut = useCallback(async () => {
+    try {
+      await axios.post(
+        `${Config.API_URL}/logout`,
+        {},
+        {headers: {Authorization: `Bearer ${accessToken}`}},
+      );
+      Alert.alert('알림', '로그아웃 완료!');
+      dispatch(
+        userSlice.actions.setUser({
+          name: '',
+          email: '',
+          accessToken: '',
+        }),
+      );
+      await EncryptedStorage.removeItem('refreshToken');
     } catch (error) {
-      Alert.alert('알림', error.response.data.message);
+      const errorResponse = (error as AxiosError).response;
+      console.log(errorResponse);
     }
-  };
+  }, [accessToken, dispatch]);
+
   return (
     <View>
-      <Text>세팅 페이지</Text>
-      <View style={{width: 105, alignSelf: 'center'}}>
-        <View style={styles.SignUpButtonActive}>
+      <View style={styles.money}>
+        <Text style={styles.moneyText}>{name}님의 수익금</Text>
+        <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+          {money === undefined ? 0 : money.toLocaleString()}원
+        </Text>
+      </View>
+      <View style={{width: 130, alignSelf: 'center', marginTop: 20}}>
+        <View
+          style={[
+            styles.SignUpButtonActive,
+            {
+              borderRadius: 5,
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: 50,
+            },
+          ]}>
           <Pressable onPress={logOut}>
-            <Text style={styles.loginButtonText}>로그아웃 하기</Text>
+            <Text style={[styles.loginButtonText]}>로그아웃 하기</Text>
           </Pressable>
         </View>
       </View>

@@ -45,6 +45,12 @@ const styles = StyleSheet.create({
   inputWrapper: {
     padding: 20,
   },
+  money: {alignItems: 'center', justifyContent: 'center', marginTop: 100},
+  moneyText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    marginBottom: 30,
+  },
 });
 
 export default styles;
