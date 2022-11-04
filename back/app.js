@@ -203,18 +203,20 @@ app.post('/logout', verifyToken, (req, res, next) => {
 });
 
 app.post('/accept', verifyToken, (req, res, next) => {
-  const order = orders.find(v => v.orderId === req.body.orderId);
-  if (!order) {
+  const order = orders.filter(v => {
+    return v.orderId === req.body.orderId;
+  });
+
+  if (!order[0]) {
     return res.status(400).json({message: '유효하지 않은 주문입니다.'});
   }
-  if (order.rider) {
+  if (order[0].rider) {
     return res
       .status(400)
       .json({message: '다른 사람이 이미 수락한 주문건입니다. '});
   }
-  order.rider = res.locals.email;
-  console.log(order);
-  res.send('ok');
+  order[0].rider = res.locals.email;
+  res.json({status: 201});
 });
 
 try {

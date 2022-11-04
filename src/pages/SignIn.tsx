@@ -40,6 +40,7 @@ const SignIn = ({navigation}: SignInScreenProps) => {
         email,
         password,
       });
+
       Alert.alert('알림', '로그인 완료');
       dispatch(
         userSlice.actions.setUser({
@@ -49,6 +50,7 @@ const SignIn = ({navigation}: SignInScreenProps) => {
           accessToken: response.data.data.accessToken,
         }),
       );
+
       await EncryptedStorage.setItem(
         'refreshToken',
         response.data.data.refreshToken,

@@ -34,25 +34,25 @@ const orderSlice = createSlice({
     },
     acceptOrder: (state, action: PayloadAction<string>) => {
       const index = state.orders.findIndex(
-        value => (value.orderId = action.payload),
+        value => value.orderId === action.payload,
       );
       if (index > -1) {
         state.deliveries.push(state.orders[index]);
         state.orders.splice(index, 1);
       }
     },
-    rejectOrder: (state, action) => {
+    rejectOrder: (state, action: PayloadAction<string>) => {
       const index = state.orders.findIndex(
-        value => (value.orderId = action.payload),
+        value => value.orderId === action.payload,
       );
       if (index > -1) {
         state.orders.splice(index, 1);
       }
       const delivery = state.deliveries.findIndex(
-        value => (value.orderId = action.payload),
+        value => value.orderId === action.payload,
       );
       if (delivery > -1) {
-        state.orders.splice(index, 1);
+        state.deliveries.splice(index, 1);
       }
     },
   },

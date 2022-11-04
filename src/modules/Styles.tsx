@@ -51,6 +51,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 30,
   },
+  orderButton: {
+    flex: 1,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  orderText: {
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
 });
 
 export default styles;

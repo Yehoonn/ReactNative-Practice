@@ -5,14 +5,13 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import axios, {AxiosError} from 'axios';
 import Config from 'react-native-config';
 import userSlice from '../slices/user';
-import {RootState} from '../store/reducer';
+import {useAppSelector} from '../store/reducer';
 import {useAppDispatch} from '../store';
-import {useSelector} from 'react-redux';
 
 const Settings = () => {
-  const name = useSelector((state: RootState) => state.user.name);
-  const money = useSelector((state: RootState) => state.user.money);
-  const accessToken = useSelector((state: RootState) => state.user.accessToken);
+  const name = useAppSelector(state => state.user.name);
+  const money = useAppSelector(state => state.user.money);
+  const accessToken = useAppSelector(state => state.user.accessToken);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -21,11 +20,11 @@ const Settings = () => {
         const response = await axios.get<{data: number}>(
           `${Config.API_URL}/showmethemoney`,
           {
-            headers: {authorization: `Bearer ${accessToken}`},
+            headers: {Authorization: `Bearer ${accessToken}`},
           },
         );
         dispatch(userSlice.actions.setMoney(response.data.data));
-        console.log(response.data);
+        console.log(response.data.data);
       } catch (error) {
         console.log(error);
       }
@@ -58,9 +57,9 @@ const Settings = () => {
   return (
     <View>
       <View style={styles.money}>
-        <Text style={styles.moneyText}>{name}님의 수익금</Text>
+        <Text style={styles.moneyText}>{`${name}님의 수익금`}</Text>
         <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-          {money === undefined ? 0 : money.toLocaleString()}원
+          {money === undefined || money === null ? 0 : money.toLocaleString()}원
         </Text>
       </View>
       <View style={{width: 130, alignSelf: 'center', marginTop: 20}}>

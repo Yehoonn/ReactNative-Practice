@@ -19,6 +19,9 @@ const userSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
     },
+    setAccessToken(state, action: PayloadAction<string>) {
+      state.accessToken = action.payload;
+    },
     setMoney(state, action: PayloadAction<number>) {
       state.money = action.payload;
     },

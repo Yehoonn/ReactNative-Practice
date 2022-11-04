@@ -7,8 +7,7 @@ import Orders from './src/pages/Orders';
 import Delivery from './src/pages/Delivery';
 import SignIn from './src/pages/SignIn';
 import SignUp from './src/pages/SignUp';
-import {RootState} from './src/store/reducer';
-import {useSelector} from 'react-redux';
+import {useAppSelector} from './src/store/reducer';
 import useSocket from './src/hooks/useSocket';
 import axios, {AxiosError} from 'axios';
 import Config from 'react-native-config';
@@ -34,7 +33,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppInner = () => {
-  const isLoggedIn = useSelector((state: RootState) => !!state.user.email);
+  const isLoggedIn = useAppSelector(state => !!state.user.email);
   const [socket, disconnect] = useSocket();
   const dispatch = useAppDispatch();
 
@@ -93,6 +92,44 @@ const AppInner = () => {
       }
     };
     getTokenAndRefresh();
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    axios.interceptors.response.use(
+      res => {
+        return res;
+      },
+      async error => {
+        const {
+          config,
+          response: {status},
+        } = error;
+        if (status === 419) {
+          if (error.response.data.code === 'expired') {
+            console.log('토큰 만료');
+            const originalRequest = config;
+            const refreshToken = await EncryptedStorage.getItem('refreshToken');
+            const response = await axios.post(
+              `${Config.API_URL}/refreshToken`,
+              {},
+              {
+                headers: {
+                  Authorization: refreshToken,
+                },
+              },
+            );
+            console.log('토큰 재설정 완료');
+            dispatch(
+              userSlice.actions.setAccessToken(response.data.data.accessToken),
+            );
+            console.log('요청 재실행');
+            originalRequest.headers.Authorization = `Bearer ${response.data.data.accessToken}`;
+            return axios(originalRequest);
+          }
+        }
+        return Promise.reject(error);
+      },
+    );
   }, [dispatch]);
 
   return (

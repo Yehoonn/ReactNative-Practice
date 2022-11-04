@@ -1,3 +1,4 @@
+import {useSelector} from 'react-redux';
 import {combineReducers} from 'redux';
 import userSlice from '../slices/user';
 import orderSlice from '../slices/order';
@@ -8,4 +9,5 @@ const rootReducer = combineReducers({
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
+export const useAppSelector = useSelector<RootState>;
 export default rootReducer;
